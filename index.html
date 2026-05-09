@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kill The Bug | Tech Quest</title>
+    <!-- Punchy, Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- JSZip Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Global Animated Background -->
+    <div class="animated-bg"></div>
+    <div id="bug-container"></div>
+
+    <!-- ============================================== -->
+    <!-- CUSTOM MODALS (Matches your chunky vibe perfectly) -->
+    <!-- ============================================== -->
+    <div id="custom-modal-overlay" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <h2 id="custom-modal-title" class="custom-modal-title">Alert</h2>
+            <p id="custom-modal-body" class="custom-modal-body">Message goes here.</p>
+            <div class="custom-modal-buttons">
+                <button id="modal-cancel-btn" class="btn-lively btn-yellow" style="display: none;" onclick="closeModal(false)">Cancel</button>
+                <button id="modal-confirm-btn" class="btn-lively btn-green" onclick="closeModal(true)">Acknowledge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Wheel of Fortune Modal -->
+    <div id="wheel-modal-overlay" class="custom-modal-overlay">
+        <div class="custom-modal-box" style="text-align: center;">
+            <h2 class="custom-modal-title" style="color: var(--accent-purple);">Wheel of Fate</h2>
+            <p class="custom-modal-body" style="font-size: 1rem;">Cost: -2 Points. Spin to permanently alter your grid to Easy or Hard.</p>
+            
+            <div class="wheel-container">
+                <div id="fortune-wheel" class="wheel"></div>
+                <div class="wheel-spin-btn" onclick="executeSpin()">Spin</div>
+            </div>
+
+            <button class="btn-lively btn-yellow" style="width: 100%; margin-top: 30px;" onclick="closeWheelModal()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Final Bug Rush Overlay -->
+    <div id="bug-rush-overlay">
+        <div class="rush-box">
+            <h1 class="rush-title">FINAL BUG RUSH!</h1>
+            <p style="font-size: 1.5rem; font-weight: bold; margin-bottom: 20px;">10 BUGS ESCAPED. CATCH THEM ALL.</p>
+            <p id="rush-timer" style="font-size: 4rem; font-family: var(--font-code); color: var(--accent-yellow); text-shadow: 4px 4px 0px #101820;">20</p>
+        </div>
+        <div id="rush-bug-container"></div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 1: LANDING PAGE -->
+    <!-- ============================================== -->
+    <div id="landing-view" class="view active">
+        <nav>
+            <div class="nav-container">
+                <div class="logo"><i class="fas fa-bug"></i> Kill The Bug</div>
+                <div class="nav-links">
+                    <button class="btn-lively btn-yellow" onclick="switchView('login-view')"><i class="fas fa-gamepad"></i> Enter Arena</button>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <h1>Squash<br>The Bugs</h1>
+            <p>15 Java snippets. 2 hours. Pure logic. Hunt down syntax, runtime, and logic errors.</p>
+            <button class="btn-lively" onclick="switchView('login-view')">Register / Login Now</button>
+        </header>
+
+        <main class="container">
+            <div class="grid">
+                <div class="lively-card">
+                    <div class="card-icon" style="background: var(--accent-yellow);"><i class="fas fa-file-alt"></i></div>
+                    <h3>Format</h3>
+                    <p>Individual • Offline • Code Analysis</p>
+                </div>
+                <div class="lively-card">
+                    <div class="card-icon"><i class="fas fa-stopwatch"></i></div>
+                    <h3>Duration</h3>
+                    <p>120 Minutes. 15 Snippets.</p>
+                </div>
+                <div class="lively-card">
+                    <div class="card-icon" style="background: #FF007F; color: white;"><i class="fas fa-users"></i></div>
+                    <h3>Eligibility</h3>
+                    <p>Classes 9 to 12 (Single Open Category)</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 2: LOGIN SYSTEM -->
+    <!-- ============================================== -->
+    <div id="login-view" class="view">
+        <nav>
+            <div class="nav-container">
+                <div class="logo"><i class="fas fa-bug"></i> KTB Login</div>
+            </div>
+        </nav>
+
+        <div class="login-wrapper">
+            <div class="login-box">
+                <div class="tab-container">
+                    <button class="tab-btn active" data-type="player" onclick="switchLoginTab('player')">Player</button>
+                    <button class="tab-btn" data-type="admin" onclick="switchLoginTab('admin')">Admin</button>
+                </div>
+
+                <h2 id="login-title" style="margin-bottom: 20px; font-size: 1.8rem; text-transform: uppercase;">Player Registration</h2>
+                
+                <form id="login-form">
+                    <div id="player-fields">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="p-name" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <div class="input-group" style="flex: 1;">
+                                <label>Class</label>
+                                <input type="text" id="p-class" placeholder="e.g., 10" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                            </div>
+                            <div class="input-group" style="flex: 1;">
+                                <label>Section</label>
+                                <input type="text" id="p-section" placeholder="e.g., A" maxlength="1" required oninput="this.value = this.value.replace(/[^a-zA-Z]/g, '')">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Scholar Number</label>
+                            <input type="text" id="p-scholar" required oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        </div>
+                    </div>
+
+                    <div id="admin-fields" style="display: none;">
+                        <div class="input-group">
+                            <label>Admin ID</label>
+                            <input type="text" id="a-user" autocomplete="off">
+                        </div>
+                        <div class="input-group" style="position: relative;">
+                            <label>Password</label>
+                            <input type="password" id="a-pass" style="padding-right: 40px;">
+                            <i class="fas fa-eye pwd-toggle-icon" id="toggle-pwd" onclick="togglePassword()"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-lively" style="width: 100%; margin-top: 10px;">Access System</button>
+                    <p id="error-message" class="error-text"></p>
+                </form>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="clear-btn" onclick="switchView('landing-view')">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 3: ROUND 1 (IMAGE QUIZ) -->
+    <!-- ============================================== -->
+    <div id="image-quiz-view" class="view">
+        <nav>
+            <div class="nav-container">
+                <div class="logo"><i class="fas fa-eye"></i> ROUND 1: VISION</div>
+                <div class="nav-links">
+                    <span id="round1-timer" class="score-badge" style="background: var(--ladybug-red); color: white; border-color: var(--ladybug-red);">05:00</span>
+                </div>
+            </div>
+        </nav>
+        <main class="container">
+            <div class="dash-header" style="margin-top: 20px; background: var(--accent-yellow); color: var(--text-dark);">
+                <h1 style="font-size: 2.5rem; text-transform: uppercase;">Identify the Images</h1>
+                <p style="font-weight: 700; font-size: 1.1rem;">Gain +2 Points per correct answer. Maximum 16 Points.</p>
+            </div>
+            
+            <div class="grid" id="image-grid" style="margin-top: 40px;">
+                <!-- 8 Image slots generated dynamically by JS to keep code clean -->
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 50px;">
+                <button class="btn-lively btn-green" style="font-size: 1.5rem; padding: 15px 40px;" onclick="finishRound1()">Finish Round 1</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 4: INSTRUCTIONS MODAL (Main Arena) -->
+    <!-- ============================================== -->
+    <div id="instructions-view" class="view">
+        <div class="login-wrapper">
+            <div class="login-box" style="max-width: 600px; border-color: var(--accent-yellow);">
+                <h2 style="font-size: 2rem; text-transform: uppercase; margin-bottom: 20px; color: var(--accent-purple);">Rules of the Arena</h2>
+                
+                <ul style="margin-bottom: 30px; padding-left: 20px; font-size: 1.1rem; line-height: 1.8; font-weight: 600;">
+                    <li>You have <b>2 Hours (120 minutes)</b>. Max score is <b>100 Points</b>.</li>
+                    <li>The Main Grid contains 25 Moderate questions (+3 pts each).</li>
+                    <li>Stuck? Spend 2 points to spin the <b>Wheel of Fate</b> for Easy (+2 pts) or Hard (+5 pts) questions!</li>
+                    <li>Use the <b>Side Quest Shop</b> to buy hints using your earned points.</li>
+                    <li>Watch out for random <b>Golden Ladybugs</b> (+2 pts) and the <b>Final Bug Rush</b>!</li>
+                </ul>
+
+                <button class="btn-lively btn-green" style="width: 100%; font-size: 1.3rem;" onclick="startHunt()">Enter The Grid!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 5: DASHBOARD -->
+    <!-- ============================================== -->
+    <div id="dashboard-view" class="view">
+        <nav>
+            <div class="nav-container">
+                <div class="logo"><i class="fas fa-bug"></i> KTB Panel</div>
+                
+                <div id="timer-display" class="score-badge" style="display: none; border-color: var(--accent-green);">
+                    02:00:00
+                </div>
+
+                <div class="nav-links" style="display: flex; gap: 15px; align-items: center;">
+                    <span id="score-badge" class="score-badge" style="display: none;">Score: 0 / 100</span>
+                    <button id="final-submit-btn" class="btn-lively btn-yellow" onclick="exportFinalZip()" style="display: none;">
+                        <i class="fas fa-file-archive"></i> Final Submit
+                    </button>
+                    <button class="btn-lively btn-green" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container">
+            <div class="dash-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1 id="welcome-message" style="font-size: 3rem; text-transform: uppercase; margin-bottom: 5px;">Welcome</h1>
+                    <p id="player-details" style="font-size: 1.2rem; font-weight: 700;"></p>
+                </div>
+                <button id="wheel-btn" class="btn-lively" style="background: #FF007F; border-color: #101820; font-size: 1.3rem; display: none;" onclick="openWheelModal()">
+                    <i class="fas fa-dharmachakra"></i> Spin Wheel (-2 Pts)
+                </button>
+            </div>
+
+            <!-- Admin Editor System -->
+            <div id="admin-controls" style="display: none; margin-top: 50px;">
+                <h2 class="section-title">Target Editor</h2>
+                <div class="lively-card" style="border-color: var(--accent-purple);">
+                    <div class="input-group">
+                        <label>Target Title</label>
+                        <input type="text" id="new-target-title" placeholder="e.g., Target #04: Sorting Algorithm">
+                    </div>
+                    <div class="input-group">
+                        <label>Buggy Java Code</label>
+                        <textarea id="new-target-code" style="width: 100%; min-height: 200px; padding: 15px; font-family: var(--font-code); border: var(--border-heavy); border-radius: 8px;" placeholder="public class Main..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button id="admin-save-btn" class="btn-lively" onclick="saveAdminProblem()">Add to Grid</button>
+                        <button id="admin-cancel-btn" class="btn-lively btn-yellow" style="display: none;" onclick="cancelAdminEdit()">Cancel Edit</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 50px; margin-bottom: 30px;">
+                <h2 id="grid-title-label" class="section-title" style="margin-bottom: 0;">Live Targets Grid (Moderate)</h2>
+            </div>
+            
+            <div class="grid" id="problems-grid">
+                <!-- Problems dynamically loaded here by JS -->
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- VIEW 6: SPLIT SCREEN EDITOR -->
+    <!-- ============================================== -->
+    <div id="editor-view" class="view">
+        <nav>
+            <div class="nav-container">
+                <div class="logo"><i class="fas fa-laptop-code"></i> Editor Mode</div>
+                <div class="nav-links" style="display: flex; gap: 15px; align-items: center;">
+                    <span id="editor-score-badge" class="score-badge">Score: 0 / 100</span>
+                    <button class="btn-lively btn-yellow" onclick="switchView('dashboard-view')">Back to Grid</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container" style="max-width: 1600px;">
+            <div class="editor-header">
+                <div>
+                    <h2 id="editor-title" style="font-size: 2rem; text-transform: uppercase;">Target Name</h2>
+                    
+                    <div class="error-selection">
+                        <label><input type="checkbox" value="Syntax" class="bug-type-check"> Syntax Error</label>
+                        <label><input type="checkbox" value="Runtime" class="bug-type-check"> Runtime Error</label>
+                        <label><input type="checkbox" value="Logic" class="bug-type-check"> Logic Error</label>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <!-- SIDE QUEST SHOP BUTTON -->
+                    <button class="btn-lively" style="background: #FF6D00;" onclick="openShop()">
+                        <i class="fas fa-shopping-cart"></i> Side Quest Shop
+                    </button>
+                    <button class="btn-lively btn-green" onclick="saveFixLocally()">Save Fix Locally</button>
+                </div>
+            </div>
+
+            <div class="split-container">
+                <div class="code-pane" style="border-color: #D50000;">
+                    <div class="pane-label" style="background: #D50000; color: white;">Original (Locked)</div>
+                    <pre id="original-code"></pre>
+                </div>
+                <div class="code-pane" style="border-color: #00E676;">
+                    <div class="pane-label" style="background: #00E676;">Your Fix (Editable)</div>
+                    <textarea id="editable-code" spellcheck="false" oninput="autoResize(this)"></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- HOVER FLOATING SUPPORT BUTTON -->
+    <!-- ============================================== -->
+    <div class="floating-support">
+        <button class="support-btn">
+            <i class="fas fa-headset"></i> Support
+        </button>
+        <div class="support-popup" id="support-popup">
+            <h4 style="margin-bottom: 10px; color: var(--accent-purple); text-transform: uppercase; border-bottom: 2px solid #ccc; padding-bottom: 5px;">Event Hosts</h4>
+            <ul style="list-style: none; line-height: 1.8; font-weight: 600;">
+                <li><i class="fas fa-user-shield" style="color: var(--accent-green);"></i> Mohd. Faiz Raza (Class 11-C)</li>
+                <li><i class="fas fa-user-shield" style="color: var(--accent-green);"></i> Satyam Sharma (Class 11-C)</li>
+                <li><i class="fas fa-user-shield" style="color: var(--accent-green);"></i> Aarav Patel (Class 12-C)</li>
+                <li><i class="fas fa-user-shield" style="color: var(--accent-green);"></i> Ansh Bhadauria (Class 12-C)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
